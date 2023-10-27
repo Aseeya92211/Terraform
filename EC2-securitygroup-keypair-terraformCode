@@ -1,0 +1,45 @@
+# Define provider
+provider "aws" {
+
+region = "us-east-1"
+  
+}
+
+# Create a security group
+resource "aws_security_group" "example_security_group" {
+  name        = "example-security-group"
+  description = "Example security group"
+  
+  # Define ingress rules (inbound traffic)
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Open to all sources (for SSH)
+  }
+}
+
+# Create a key pair
+resource "aws_key_pair" "example_key_pair" {
+  key_name   = "example-key-pair"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com" # Replace with the path to your public key
+}
+# Define the subnet ID (hardcoded for this example)
+variable "subnet_id" {
+  default = "subnet-01167cf28a9a4c4fe" # Replace with your desired subnet ID
+}
+
+# Create an EC2 instance
+resource "aws_instance" "demo1" {
+
+    ami = "ami-0fc5d935ebf8bc3bc"
+    instance_type = "t2.micro"
+    subnet_id = var.subnet_id
+    key_name = aws_key_pair.example_key_pair.key_name
+    vpc_security_group_ids = [aws_security_group.example_security_group.id]
+    tags = {
+    Name = "example-instance"
+  }
+  
+}
+
